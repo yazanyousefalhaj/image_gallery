@@ -3,15 +3,29 @@ window.addEventListener('DOMContentLoaded', async (event) => {
 	const CHUNK_SIZE = 20;
 	let selectedCount = 0;
 
+    const main = document.querySelector("main");
+	const activeCountElement = document.createElement("p");
+
+	const imageGalleryElement = document.createElement("div");
+    imageGalleryElement.classList.add("image-gallery");
+
+    const buttonWrapper = document.createElement("div");
+    buttonWrapper.classList.add("button-wrapper");
+    const loadMoreButton = document.createElement("button");
+    loadMoreButton.classList.add("btn");
+    loadMoreButton.innerText = "Load More"
+    buttonWrapper.appendChild(loadMoreButton);
+
+    [activeCountElement, imageGalleryElement, buttonWrapper].forEach(e => {
+        main.appendChild(e);
+    })
+
 	const onImageSelected = (id) => {
-		console.log("image selected");
 		const imageEl = document.querySelector(`#image-${id} .card-body`);
 		const wasAdded = imageEl.classList.toggle("active");
 		selectedCount += wasAdded ? 1 : -1;
 		updateActiveCount(selectedCount);
 	}
-
-
 
 	const renderImage = (imageAttr) => {
 		const wrapper = document.createElement("div");
@@ -31,7 +45,6 @@ window.addEventListener('DOMContentLoaded', async (event) => {
 		wrapper.querySelector("button").addEventListener("click", (e) => {
 			onImageSelected(imageAttr.id);
             e.target.innerHTML = e.target.innerHTML == "Select"? "Unselect": "Select"
-            console.log(e.target.innerHTML)
         });
 		return wrapper;
 	};
@@ -53,9 +66,6 @@ window.addEventListener('DOMContentLoaded', async (event) => {
 		}
 	}
 
-	const imageGalleryElement = document.getElementById("image-gallery");
-	const activeCountElement = document.getElementById("active-count")
-
 	const imagesJson = await fetch("https://jsonplaceholder.typicode.com/photos").then(r => r.json());
 
 	console.log(imagesJson);
@@ -66,7 +76,7 @@ window.addEventListener('DOMContentLoaded', async (event) => {
 
 	updateActiveCount(selectedCount);
 
-    document.getElementById("load-more").addEventListener("click", (e) => {
+    loadMoreButton.addEventListener("click", (e) => {
         chunk++;
         if ((chunk - 1) * CHUNK_SIZE > imagesJson.length) {
             e.target.disabled = true;
