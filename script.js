@@ -5,7 +5,7 @@ window.addEventListener('DOMContentLoaded', async (event) => {
 
 	const onImageSelected = (id) => {
 		console.log("image selected");
-		const imageEl = document.querySelector(`div[data-id="${id}"]`);
+		const imageEl = document.querySelector(`#image-${id} .card-body`);
 		const wasAdded = imageEl.classList.toggle("active");
 		selectedCount += wasAdded ? 1 : -1;
 		updateActiveCount(selectedCount);
@@ -15,20 +15,24 @@ window.addEventListener('DOMContentLoaded', async (event) => {
 
 	const renderImage = (imageAttr) => {
 		const wrapper = document.createElement("div");
-		wrapper.classList.add("col-4", "card")
-		wrapper.dataset.id = imageAttr.id
+		wrapper.classList.add("card")
+		wrapper.id = `image-${imageAttr.id}`
 		wrapper.innerHTML = `
-			<img src="${imageAttr.thumbnailUrl}" class="card-img-top" alt="..." />
+			<img src="${imageAttr.thumbnailUrl}" class="card-img" alt="..." />
 			<div class="card-body">
 				<h5 class="card-title">${imageAttr.title}</h5>
 				<p class="card-text">
 					Some quick example text to build on the card title and make up the bulk
 					of the card's content.
 				</p>
-				<button href="#!" class="btn btn-primary">Button</button>
+				<button href="#!" class="btn">Select</button>
 			</div>
 		`
-		wrapper.querySelector("button").addEventListener("click", () => {onImageSelected(imageAttr.id)});
+		wrapper.querySelector("button").addEventListener("click", (e) => {
+			onImageSelected(imageAttr.id);
+            e.target.innerHTML = e.target.innerHTML == "Select"? "Unselect": "Select"
+            console.log(e.target.innerHTML)
+        });
 		return wrapper;
 	};
 
@@ -58,9 +62,15 @@ window.addEventListener('DOMContentLoaded', async (event) => {
 
 	let chunk = 0;
 
-	for (let el of loadChunk(imagesJson, chunk)) {
-		imageGalleryElement.appendChild(el);
-	}
+    loadChunk(imagesJson, chunk).forEach(e => imageGalleryElement.appendChild(e));
 
 	updateActiveCount(selectedCount);
+
+    document.getElementById("load-more").addEventListener("click", (e) => {
+        chunk++;
+        if ((chunk - 1) * CHUNK_SIZE > imagesJson.length) {
+            e.target.disabled = true;
+        }
+        loadChunk(imagesJson, chunk).forEach(e => imageGalleryElement.appendChild(e));
+    })
 });
